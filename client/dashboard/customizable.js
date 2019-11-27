@@ -13,6 +13,7 @@ import { applyFilters } from '@wordpress/hooks';
  * WooCommerce dependencies
  */
 import { H } from '@woocommerce/components';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -231,6 +232,7 @@ class CustomizableDashboard extends Component {
 			taskListHidden,
 			taskListCompleted,
 			doThisLater,
+			defaultDateRange,
 		} = this.props;
 		const { sections } = this.state;
 
@@ -243,13 +245,11 @@ class CustomizableDashboard extends Component {
 			return <TaskList query={ query } />;
 		}
 
-		const { period, compare, before, after } = getDateParamsFromQuery(
-			query
+		const { period, compare, before, after } = getDateParamsFromQuery( query, defaultDateRange );
+		const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates(
+			query,
+			defaultDateRange
 		);
-		const {
-			primary: primaryDate,
-			secondary: secondaryDate,
-		} = getCurrentDates( query );
 		const dateQuery = {
 			period,
 			compare,
@@ -327,8 +327,13 @@ export default compose(
 			isGetOptionsRequesting,
 		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
+		const { woocommerce_default_date_range: defaultDateRange } = select(
+			SETTINGS_STORE_NAME
+		).getSetting( 'wc_admin', 'wcAdminSettings' );
+
 		const withSelectData = {
 			userPrefSections: userData.dashboard_sections,
+			defaultDateRange,
 			requesting: false,
 		};
 
